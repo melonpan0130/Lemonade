@@ -1,0 +1,12 @@
+<h1>Lemonade</h1>
+<a href="/SignUp"><button>Sign up</button></a>
+<a href="/SignIn"><button>Sign in</button></a>
+<ul>
+<% data.forEach(function(item, index) { %>
+<li>
+    <p><%= item.userId %></p>
+    <p><%= item.content %></p>
+    <p><%= item.img %></p>
+</li>
+<% }) %> 
+</ul>
