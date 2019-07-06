@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({
 });
 
 app.get('/', function(request, response) {
-    fs.readFile('hello.html', 'utf8', function(error, data) {
+    fs.readFile('html/hello.html', 'utf8', function(error, data) {
         db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
             response.send(ejs.render(data, {
                 data:results
@@ -31,7 +31,18 @@ app.get('/', function(request, response) {
 });
 
 app.get('/SignUp', function(request, response) {
+    fs.readFile('html/SignUp.html', 'utf8', function(error, data) {
+        response.send(data);
+    });
+});
 
+app.post('/SignUpProc', function(request, response) {
+    var body = request.body;
+    db.query('INSERT INTO user (name, email, pw) VALUES (?, ?, ?)'
+    , [body.name, body.email, body.pw]
+    , function() {
+        response.redirect('/');
+    });
 });
 
 app.get('/SignIn', function(request, response) {
