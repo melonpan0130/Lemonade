@@ -30,6 +30,7 @@ app.get('/', function(request, response) {
     });
 });
 
+// sign up
 app.get('/SignUp', function(request, response) {
     fs.readFile('html/SignUp.html', 'utf8', function(error, data) {
         response.send(data);
@@ -40,13 +41,31 @@ app.post('/SignUpProc', function(request, response) {
     var body = request.body;
     db.query('INSERT INTO user (name, email, pw) VALUES (?, ?, ?)'
     , [body.name, body.email, body.pw]
-    , function() {
+    , function(error, data) {
         response.redirect('/');
     });
 });
 
+// sign in
 app.get('/SignIn', function(request, response) {
+    fs.readFile('html/SignIn.html', 'utf8', function(error, data) {
+        response.send(data);
+    });
+});
 
+app.post('/SignInProc', function(request, response) {
+    var body = request.body;
+    db.query('SELECT pw FROM user WHERE email = ?'
+    , [body.email]
+    , function(error, data) {
+        if(error)
+            throw error; // email or pw is not correct
+        else {
+            console.log('welcome!');
+            response.redirect('/');
+        }
+        
+    });
 });
 /*
 http.createServer(function(request, response) {
