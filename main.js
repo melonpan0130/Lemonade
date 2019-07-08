@@ -61,6 +61,7 @@ app.post('/SignInProc', function(request, response) {
     , [body.email]
     , function(error, results) {
         if(password == results.pw){ // login success
+            // alert you succeed
             response.cookie('auth', email);
             response.redirect('/');
         }
@@ -68,9 +69,57 @@ app.post('/SignInProc', function(request, response) {
             // alert something you wrong
             response.redirect('/SignIn');
         }
-        
     });
 });
+
+// mypage
+app.get('/myPage/:id', function(request, response) {
+    fs.readFile('html/myPage.html', 'utf8', function(error, data) {
+        db.query('SELECT * FROM board WHERE userId = ? ORDER BY id DESC'
+        , [request.params.id]
+        , function(error, results) {
+            response.send(ejs.render(data, {
+                data:results
+            }));
+        });
+    });
+})
+
+// connect to board ; /lemon/userId/boardId
+app.get('/lemon/:id/:id', function(request, response) {
+    db.query('');
+});
+
+// add board in mypage ; /insert/userId
+app.get('/insert/:id', function(request, response) {
+    fs.readFile('/html/')
+});
+
+app.post('/insert/:id', function(request, response) {
+    var body = request.body;
+
+    db.query('INSERT INTO board (userId, content) VALUES (?, ?)'
+    , [request.params.id, ]
+    , function() {
+
+    });
+});
+
+// edit board in mypage ; /edit/boardId
+app.get('/update/:id', function(request, response) {
+    var body = request.body;
+
+    db.query('UPDATE board SET content = ?', []);
+});
+
+// delete board in mypage ; /delete/boardId
+app.get('/delete/:id', function(request, response) {
+    db.query('DELETE FROM board WHERE id = ?', [request.params.id]
+    , function(){
+        response.redirect('/');
+    });
+});
+
 
 
 /*

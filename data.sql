@@ -10,6 +10,7 @@ CREATE TABLE user (
 CREATE TABLE board (
   id INT NOT NULL AUTO_INCREMENT,
   userId INT NOT NULL,
+  title NVARCHAR(45) NOT NULL,
   content LONGTEXT NULL,
   img MEDIUMBLOB NULL,
   PRIMARY KEY (`id`),
@@ -29,5 +30,7 @@ INSERT INTO user (name, email, pw) VALUES ('hi', 'hi@naver.com', '1234');
 
 INSERT INTO board (userId, content) VALUES ('1', 'It is very good');
 INSERT INTO board (userId, content) VALUES ('1', 'I am selling ...');
+INSERT INTO board (userId, content) VALUES ('2', 'I am selling ...');
+
 
 INSERT INTO comment (boardId, userName, content) VALUES ('1', 'who', 'hello! I want to buy one...');
