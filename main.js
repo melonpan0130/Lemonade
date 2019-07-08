@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({
 });
 
 app.get('/', function(request, response) {
-    fs.readFile('html/hello.html', 'utf8', function(error, data) {
+    fs.readFile('html/main.html', 'utf8', function(error, data) {
         db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
             response.send(ejs.render(data, {
                 data:results
@@ -32,8 +32,8 @@ app.get('/', function(request, response) {
 
 // sign up
 app.get('/SignUp', function(request, response) {
-    fs.readFile('html/SignUp.html', 'utf8', function(error, data) {
-        response.send(data);
+    fs.readFile('html/SignUp.html', 'utf8', function(error, results) {
+        response.send(results);
     });
 });
 
@@ -41,32 +41,38 @@ app.post('/SignUpProc', function(request, response) {
     var body = request.body;
     db.query('INSERT INTO user (name, email, pw) VALUES (?, ?, ?)'
     , [body.name, body.email, body.pw]
-    , function(error, data) {
+    , function(error, results) {
         response.redirect('/');
     });
 });
 
 // sign in
 app.get('/SignIn', function(request, response) {
-    fs.readFile('html/SignIn.html', 'utf8', function(error, data) {
-        response.send(data);
+    fs.readFile('html/SignIn.html', 'utf8', function(error, results) {
+        response.send(results);
     });
 });
 
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
+    var email = request.body.email;
+    var password = request.body.password;
     db.query('SELECT pw FROM user WHERE email = ?'
     , [body.email]
-    , function(error, data) {
-        if(error)
-            throw error; // email or pw is not correct
-        else {
-            console.log('welcome!');
+    , function(error, results) {
+        if(password == results.pw){ // login success
+            response.cookie('auth', email);
             response.redirect('/');
+        }
+        else { // failed
+            // alert something you wrong
+            response.redirect('/SignIn');
         }
         
     });
 });
+
+
 /*
 http.createServer(function(request, response) {
     var _url = request.url;
