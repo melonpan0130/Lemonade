@@ -103,8 +103,8 @@ app.get('/insert', function(request, response) {
 
 app.post('/insert', function(request, response) {
     var body = request.body;
-    var content = request.body.content;
     var userId = request.cookies.userId;
+
     db.query('INSERT INTO board (userId, title, content) VALUES (?, ?, ?)'
     , [userId, body.title, body.content]
     , function(error, data) {
@@ -121,9 +121,12 @@ app.get('/update/:id', function(request, response) {
 
 // delete board in mypage ; /delete/boardId
 app.get('/delete/:id', function(request, response) {
-    db.query('DELETE FROM board WHERE id = ?', [request.params.id]
+    var userId = request.cookies.userId;
+
+    db.query('DELETE FROM board WHERE userId = ? AND id = ?'
+    , [userId, request.params.id]
     , function(){
-        response.redirect('/');
+        response.redirect('/myPage/'+userId);
     });
 });
 
