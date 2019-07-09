@@ -16,7 +16,7 @@
         <p><%= item.title %></p>
         <p><%= item.content %></p>
         <p><%= item.img %></p>
-        <a href="/update/"><button>Edit</button></a>
+        <a href=<%="/update/"+item.id %>><button>Edit</button></a>
         <a href=<%="/delete/"+item.id %>><button>Delete</button></a>
     </li>
     <% }) %> 

@@ -5,8 +5,11 @@ var ejs = require('ejs');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mysql = require('mysql');
+
 var isLogin = false;
+var userId = null;
+
+var mysql = require('mysql');
 var db = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
@@ -17,7 +20,7 @@ db.connect();
 
 var app = express();
 app.use(bodyParser.urlencoded({
-    extended: false
+    extended: false 
 })).listen(3000, function() {
     console.log('Success');
 });
@@ -26,12 +29,13 @@ app.use(cookieParser());
 
 app.get('/', function(request, response) {
     fs.readFile('html/main.html', 'utf8', function(error, data) {
+        userId = (isLogin) ? request.cookies.userId : null
+
         db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
-            
             response.send(ejs.render(data, {
                 data : results,
                 isLogin : isLogin,
-                userId : (isLogin) ? request.cookies.userId : null
+                userId : userId
             }));
         });
     });
@@ -70,7 +74,9 @@ app.post('/SignInProc', function(request, response) {
             // alert you succeed
             response.cookie('userEmail', email);
             response.cookie('userId', results[0].id);
+            userId = request.cookies.userId;
             isLogin = true;
+
             response.redirect('/');
         }
         else { // failed
@@ -103,7 +109,6 @@ app.get('/insert', function(request, response) {
 
 app.post('/insert', function(request, response) {
     var body = request.body;
-    var userId = request.cookies.userId;
 
     db.query('INSERT INTO board (userId, title, content) VALUES (?, ?, ?)'
     , [userId, body.title, body.content]
@@ -114,15 +119,30 @@ app.post('/insert', function(request, response) {
 
 // edit board in mypage ; /edit/boardId
 app.get('/update/:id', function(request, response) {
+    fs.readFile('html/updateBoard.html', 'utf8'
+    , function(error, data) {
+        db.query('SELECT * FROM board WHERE userid = ? AND id = ?'
+        , [userId, request.params.id]
+        , function(error, results) {
+            response.send(ejs.render(data, {
+                data : results[0]
+            }));
+        });
+    });
+});
+
+app.post('/update/:id', function(request, response) {
     var body = request.body;
 
-    db.query('UPDATE board SET content = ?', []);
-});
+    db.query('UPDATE board SET title = ?, content = ? WHERE id = ?'
+    , [body.title, body.content, request.params.id]
+    , function(error, data) {
+        response.redirect('/myPage/'+userId);
+    });
+}); 
 
 // delete board in mypage ; /delete/boardId
 app.get('/delete/:id', function(request, response) {
-    var userId = request.cookies.userId;
-
     db.query('DELETE FROM board WHERE userId = ? AND id = ?'
     , [userId, request.params.id]
     , function(){
