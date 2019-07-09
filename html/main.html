@@ -4,19 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script>
+        
+    </script>
 </head>
 <body>
     <h1>Lemonade</h1>
-    <a href="/SignUp"><button>Sign up</button></a>
-    <a href="/SignIn"><button>Sign in</button></a>
-    <a href="/myPage/"><button>myPage</button></a>
+    <% if(!isLogin){ %>
+        <a href="/SignUp"><button>Sign up</button></a>
+        <a href="/SignIn"><button>Sign in</button></a>
+    <% } else { %>
+        <a href=<%= "/myPage/"+userId %>><button>myPage</button></a>
+    <% } %>
+
     <ul>
     <% data.forEach(function(item, index) { %>
-    <li>
-        <p><%= item.userId %></p>
-        <p><%= item.content %></p>
-        <p><%= item.img %></p>
-    </li>
+        <li>
+            <p><%= item.userId %></p>
+            <p><%= item.title %></p>
+            <p><%= item.content %></p>
+            <p><%= item.img %></p>
+        </li>
     <% }) %> 
     </ul>
 </body>

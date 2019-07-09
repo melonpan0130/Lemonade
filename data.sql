@@ -13,6 +13,7 @@ CREATE TABLE board (
   title NVARCHAR(45) NOT NULL,
   content LONGTEXT NULL,
   img MEDIUMBLOB NULL,
+  -- add date later ..
   PRIMARY KEY (`id`),
   FOREIGN KEY(userId) REFERENCES user (id)
 ) ENGINE = InnoDB character set=utf8;
@@ -22,6 +23,7 @@ CREATE TABLE comment (
   boardId INT NOT NULL,
   userName NVARCHAR(45) NOT NULL,
   content NVARCHAR(200) NOT NULL,
+  -- add date later ..
   PRIMARY KEY (`id`),
   FOREIGN KEY(boardId) REFERENCES board (id)
 ) ENGINE = InnoDB character set=utf8;
@@ -30,7 +32,7 @@ INSERT INTO user (name, email, pw) VALUES ('hi', 'hi@naver.com', '1234');
 
 INSERT INTO board (userId, content) VALUES ('1', 'It is very good');
 INSERT INTO board (userId, content) VALUES ('1', 'I am selling ...');
-INSERT INTO board (userId, content) VALUES ('2', 'I am selling ...');
+INSERT INTO board (userId, content) VALUES ('2', 'I am selling about...');
 
 
 INSERT INTO comment (boardId, userName, content) VALUES ('1', 'who', 'hello! I want to buy one...');

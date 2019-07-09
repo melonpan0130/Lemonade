@@ -3,8 +3,10 @@ var fs = require('fs');
 // var url = require('url');
 var ejs = require('ejs');
 var express = require('express');
+var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+var isLogin = false;
 var db = mysql.createConnection({
     host     : 'localhost',
     user     : 'root',
@@ -20,12 +22,19 @@ app.use(bodyParser.urlencoded({
     console.log('Success');
 });
 
+app.use(cookieParser());
+
 app.get('/', function(request, response) {
     fs.readFile('html/main.html', 'utf8', function(error, data) {
         db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
+            
             response.send(ejs.render(data, {
-                data:results
+                data : results,
+                isLogin : isLogin,
+                userId : (isLogin) ? request.cookies.userId : null
             }));
+            
+            // console.log('isLogin : '+typeof(response.cookies.userEmail));
         });
     });
 });
@@ -55,14 +64,15 @@ app.get('/SignIn', function(request, response) {
 
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
-    var email = request.body.email;
-    var password = request.body.password;
-    db.query('SELECT pw FROM user WHERE email = ?'
-    , [body.email]
+    var email = body.email;
+    db.query('SELECT id, pw FROM user WHERE email = ?'
+    , [email]
     , function(error, results) {
-        if(password == results.pw){ // login success
+        if(body.pw == results[0].pw){ // login success
             // alert you succeed
-            response.cookie('auth', email);
+            response.cookie('userEmail', email);
+            response.cookie('userId', results[0].id);
+            isLogin = true;
             response.redirect('/');
         }
         else { // failed
@@ -85,23 +95,22 @@ app.get('/myPage/:id', function(request, response) {
     });
 })
 
-// connect to board ; /lemon/userId/boardId
-app.get('/lemon/:id/:id', function(request, response) {
-    db.query('');
-});
-
 // add board in mypage ; /insert/userId
-app.get('/insert/:id', function(request, response) {
-    fs.readFile('/html/')
+app.get('/insert', function(request, response) {
+    fs.readFile('html/insertBoard.html', 'utf8'
+    , function(error, data) {
+        response.send(data);
+    });
 });
 
-app.post('/insert/:id', function(request, response) {
+app.post('/insert', function(request, response) {
     var body = request.body;
+    var userId = request.cookies.userId;
 
     db.query('INSERT INTO board (userId, content) VALUES (?, ?)'
-    , [request.params.id, ]
-    , function() {
-
+    , [userId, body.content]
+    , function(error, data) {
+        response.redirect('/myPage/'+userid);
     });
 });
 
@@ -120,6 +129,10 @@ app.get('/delete/:id', function(request, response) {
     });
 });
 
+// connect to board ; /lemon/userId/boardId
+app.get('/lemon/:id/:id', function(request, response) {
+    db.query('');
+});
 
 
 /*

@@ -7,12 +7,12 @@
 </head>
 <body>
     <h1>Lemonade-Mypage</h1>
-    <a href="/myPage/"><button>add Board</button></a>
     <a href="/insert/"><button>New</button></a>
     <ul>
     <% data.forEach(function(item, index) { %>
     <li>
         <p><%= item.userId %></p>
+        <p><%= item.title %></p>
         <p><%= item.content %></p>
         <p><%= item.img %></p>
         <a href="/update/"><button>Edit</button></a>
