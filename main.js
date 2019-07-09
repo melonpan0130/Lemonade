@@ -33,8 +33,6 @@ app.get('/', function(request, response) {
                 isLogin : isLogin,
                 userId : (isLogin) ? request.cookies.userId : null
             }));
-            
-            // console.log('isLogin : '+typeof(response.cookies.userEmail));
         });
     });
 });
@@ -105,12 +103,12 @@ app.get('/insert', function(request, response) {
 
 app.post('/insert', function(request, response) {
     var body = request.body;
+    var content = request.body.content;
     var userId = request.cookies.userId;
-
-    db.query('INSERT INTO board (userId, content) VALUES (?, ?)'
-    , [userId, body.content]
+    db.query('INSERT INTO board (userId, title, content) VALUES (?, ?, ?)'
+    , [userId, body.title, body.content]
     , function(error, data) {
-        response.redirect('/myPage/'+userid);
+        response.redirect('/myPage/'+userId);
     });
 });
 
