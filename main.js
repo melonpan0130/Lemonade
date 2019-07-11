@@ -93,11 +93,11 @@ app.get('/myPage/:id', function(request, response) {
         , [request.params.id]
         , function(error, results) {
             response.send(ejs.render(data, {
-                data:results
+                data : results
             }));
         });
     });
-})
+});
 
 // add board in mypage ; /insert/userId
 app.get('/insert', function(request, response) {
@@ -151,8 +151,25 @@ app.get('/delete/:id', function(request, response) {
 });
 
 // connect to board ; /lemon/userId/boardId
-app.get('/lemon/:id/:id', function(request, response) {
-    db.query('');
+app.get('/lemon/:userId/:boardId', function(request, response) {
+    var userId = request.params.userId;
+    var boardId = request.params.boardId;
+    fs.readFile('html/lemon.html', 'utf8', function(error, data){
+        db.query('SELECT * FROM board WHERE userId = ? AND id = ?'
+        , [userId, boardId]
+        , function(err, content) {
+            db.query('SELECT * FROM comment WHERE userId = ? AND boardId = ?'
+            , [userId, boardId]
+            ,function(err2, comments) {
+                response.send(ejs.render(data, {
+                    data : content[0],
+                    comment : comments
+                }));
+
+                console.log(comments);
+            });
+        });
+    });
 });
 
 
