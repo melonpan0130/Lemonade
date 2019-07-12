@@ -6,17 +6,22 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 </head>
 <body>
+    <a href="/"><h3>Lemonade</h3></a>
     <h1><%= data.title %></h1>
     <p><%= data.userName %></p>
     <p><%= data.content %></p>
-
+    <ul>
     <% comment.forEach(function(item, index) { %>
         <li>
+            <p><%= item.userId %></p>
+            <p><%= item.boardId %></p>
+            <p><%= item.id %></p>
             <p><%= item.userName %></p>
             <p><%= item.content %></p>
-            <a href=<%="/update/"+item.id %>><button>Edit</button></a>
-            <a href=<%="/delete/"+item.id %>><button>Delete</button></a>
+            <a href=<%="/update/"+item.id %>><button>Comment</button></a>
+            <a href=<%="/deleteComment/"+data.userId+"/"+data.id+"/"+item.id %>><button>Delete</button></a>
         </li>
     <% }) %> 
+    </ul>
 </body>
 </html>

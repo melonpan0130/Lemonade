@@ -8,7 +8,23 @@ var bodyParser = require('body-parser');
 
 var isLogin = false;
 var userId = null;
+var userName = null;
 
+var oracle = require('oracledb');
+var con;
+oracle.autoCommit = true;
+oracle.getConnection({
+    user     : 'LEMON',
+    password : '1234',
+    host     : 'localhost'
+}, function(err, conn) {
+    if(err){
+        console.log('DB error', err);
+    }
+    con = conn;
+});
+
+/*
 var mysql = require('mysql');
 var db = mysql.createConnection({
     host     : 'localhost',
@@ -17,7 +33,7 @@ var db = mysql.createConnection({
     database : 'studynodejs'
 });
 db.connect();
-
+*/
 var app = express();
 app.use(bodyParser.urlencoded({
     extended: false 
@@ -26,18 +42,25 @@ app.use(bodyParser.urlencoded({
 });
 
 app.use(cookieParser());
-
+/*
 app.get('/', function(request, response) {
     fs.readFile('html/main.html', 'utf8', function(error, data) {
-        userId = (isLogin) ? request.cookies.userId : null
-
         db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
             response.send(ejs.render(data, {
                 data : results,
                 isLogin : isLogin,
-                userId : userId
+                userId : userId,
+                userName : userName
             }));
+            console.log('helo');
         });
+    });
+});
+*/
+
+app.get('/', function(request, response) {
+    fs.readFile('html/main.html', 'utf8', function(error, data){
+        con.exe
     });
 });
 
@@ -67,14 +90,16 @@ app.get('/SignIn', function(request, response) {
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
     var email = body.email;
-    db.query('SELECT id, pw FROM user WHERE email = ?'
+    db.query('SELECT id, pw, name FROM user WHERE email = ?'
     , [email]
     , function(error, results) {
         if(body.pw == results[0].pw){ // login success
             // alert you succeed
             response.cookie('userEmail', email);
             response.cookie('userId', results[0].id);
+            response.cookie('userName', results[0].name);
             userId = request.cookies.userId;
+            userName = request.cookies.userName;
             isLogin = true;
 
             response.redirect('/');
@@ -93,6 +118,7 @@ app.get('/myPage/:id', function(request, response) {
         , [request.params.id]
         , function(error, results) {
             response.send(ejs.render(data, {
+                userName : userName,
                 data : results
             }));
         });
@@ -161,38 +187,27 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
             db.query('SELECT * FROM comment WHERE userId = ? AND boardId = ?'
             , [userId, boardId]
             ,function(err2, comments) {
-                response.send(ejs.render(data, {
-                    data : content[0],
-                    comment : comments
-                }));
-
+                console.log(err2);
                 console.log(comments);
+                response.send(ejs.render(data, {
+                    comment : comments,
+                    data : content[0]
+                }));
             });
         });
     });
 });
 
-
-/*
-http.createServer(function(request, response) {
-    var _url = request.url;
-    var queryData = url.parse(_url, true).query;
-    var pathname = url.parse(_url, true).pathname;
-
-    if(pathname === '/'){
-        if(queryData.id === undefined){
-            fs.readFile('hello.html', function(err, result){
-                response.writeHead(200, {'Content-Type' : 'text/html'});
-                response.end(result);
-            });
-        } else {
-            fs.readFile('hello2.html', function(err, result){
-                response.writeHead(200, {'Content-Type' : 'text/html'});
-                response.end(result);
-            })
-        }
-    }
-}).listen(3000, function() {
-    console.log('running');
+app.get('/deleteComment/:userId/:boardId/:commentId', function(request, response) {
+    var userId = request.params.userId;
+    var boardId = request.params.boardId;
+    var commentId =  request.params.commentId;
+    console.log('userID : '+userId);
+    console.log('boardId : '+boardId);
+    console.log('commentId : '+commentId);
+    db.query('DELETE FROM comment WHERE userId = ? AND boardId = ? AND id = ?'
+    , [userId, boardId, commentId]
+    ,function(error, data) {
+        console.log(data);
+    });
 });
-*/

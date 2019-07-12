@@ -26,6 +26,8 @@ CREATE TABLE comment (
   boardId INT NOT NULL,
   userName NVARCHAR(45) NOT NULL,
   content NVARCHAR(200) NOT NULL,
+  depth INT DEFAULT '0',
+  parentId INT,
   PRIMARY KEY (`id`),
   FOREIGN KEY(userId) REFERENCES user (id) ON DELETE CASCADE,
   FOREIGN KEY(boardId) REFERENCES board (id) ON DELETE CASCADE
@@ -39,6 +41,6 @@ INSERT INTO board (userId, userName, title, content) VALUES ('1', 'hi', 'Coffie'
 INSERT INTO board (userId, userName, title, content) VALUES ('2', 'he', 'Cake', 'I am selling about...');
 
 INSERT INTO comment (boardId, userId, userName, content) VALUES ('1', '1', 'who', 'hello! I want to buy one...');
-INSERT INTO comment (boardId, userId, userName, content) VALUES ('1', '1', 'who', 'Was it selled?');
+INSERT INTO comment (boardId, userId, userName, content) VALUES ('1', '1', 'who', 'Was it sold?');
 INSERT INTO comment (boardId, userId, userName, content) VALUES ('2', '2', 'who', 'hello! I want to buy one...');
 INSERT INTO comment (boardId, userId, userName, content) VALUES ('3', '2', 'who', 'hello! I want to buy one...');
