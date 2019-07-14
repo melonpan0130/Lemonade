@@ -17,7 +17,7 @@ oracle.getConnection({
     user     : 'LEMON',
     password : '1234',
     host     : 'localhost'
-}, function(err, conn) {
+}, function(err, conn) { 
     if(err){
         console.log('DB error', err);
     }
