@@ -115,29 +115,16 @@ app.get('/myPage/:id', function(request, response) {
     });
 });
 
-/*
-// mypage
-app.get('/myPage/:id', function(request, response) {
-    fs.readFile('html/myPage.html', 'utf8', function(error, data) {
-        db.query('SELECT * FROM board WHERE userId = ? ORDER BY id DESC'
-        , [request.params.id]
-        , function(error, results) {
-            response.send(ejs.render(data, {
-                userName : userName,
-                data : results
-            }));
-        });
-    });
-});
-
-// add board in mypage ; /insert/userId
+// add board
 app.get('/insert', function(request, response) {
-    fs.readFile('html/insertBoard.html', 'utf8'
-    , function(error, data) {
-        response.send(data);
-    });
+    response.render('insertBoard');
+})
+
+app.post('/insert', function(request, response) {
+    
 });
 
+/*
 app.post('/insert', function(request, response) {
     var body = request.body;
 
