@@ -1,0 +1,21 @@
+html
+    head
+        script.
+        
+    body
+        a(href='/')
+            h3 Lemonade
+        form(action='SignUpProc' method='POST')
+            label(for="name") Name
+            input(type="text" name="name" placeholder="Name")
+            br
+            label(for="email") E-mail
+            input(type="text" name="email" placeholder="E-mail")
+            br
+            label(for="pw") Password
+            input(type="text" name="pw" placeholder="Password")
+            br
+            label(for="pw2") Check Password
+            input(type="text" name="pw2" placeholder="Password")
+            br
+            input(type="submit" value="Sign up")

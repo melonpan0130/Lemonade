@@ -25,6 +25,7 @@ oracle.getConnection({
     db = conn;
 });
 
+// app setting
 var app = express();
 app.set('view engine', 'jade');
 app.set('views', './views');
@@ -39,52 +40,40 @@ app.use(bodyParser.urlencoded({
 app.use(cookieParser());
 
 app.get('/', function(request, response) {
-    // fs.readFile('main', 'utf8', function(error, data) {
-        /*
+    db.execute('SELECT * FROM BOARD ORDER BY CREATETIME DESC'
+    , []
+    , function(error, results) {
+        if(error)
+            console.log(error);
+        
         response.render('main', {
-            isLogin : false
+            data: results.rows,
+            isLogin : isLogin,
+            userId : userId,
+            userName : userName
         });
-        */
-        db.execute(`SELECT * FROM BOARD ORDER BY CREATETIME DESC`
-        , []
-        , function(error, results) {
-            if(error)
-                console.log(error);
-            
-            response.render('main', {
-                data: results.rows,
-                isLogin : isLogin,
-                userId : userId,
-                userName : userName
-            });
-            console.log(results);
-
-            /*
-            response.send(ejs.render(data, {
-                data : results,
-                isLogin : isLogin,
-                userId : userId,
-                userName : userName
-            }));*/
-            console.log('helo');
-        });
-    // });
-});
-
-/*
-app.get('/', function(request, response) {
-    fs.readFile('html/main.html', 'utf8', function(error, data){
-        con.exe
+        console.log(results);
     });
 });
 
-// sign up
 app.get('/SignUp', function(request, response) {
-    fs.readFile('html/SignUp.html', 'utf8', function(error, results) {
-        response.send(results);
-    });
+    response.render('SignUp');
 });
 
+app.post('/SignUpProc', function(request, response) {
+    var body = request.body;
+    db.execute('INSERT INTO ADEUSER (NAME, EMAIL, PW) VALUES (:1, :2, :3)'
+    , [body.name, body.email, body.pw]
+    , function(error, results) {
+        console.log('sign up');
+        console.log(request.body.name);
+        console.log(request.body.email);
+        console.log(request.body.pw);
+        console.log(results);
+        response.redirect('/');
+    });
+});
+/*
 app.post('/SignUpProc', function(request, response) {
     var body = request.body;
     db.query('INSERT INTO user (name, email, pw) VALUES (?, ?, ?)'
