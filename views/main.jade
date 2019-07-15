@@ -2,7 +2,6 @@ html
     head
         title Lemonade
         script.
-            console.log('isLogin');
     body
         h1 Lemonade
         unless isLogin
@@ -11,7 +10,7 @@ html
             a(href='/SignIn')
                 button Sign in
         else
-            a(href='/myPage/')
+            a(href='/myPage/'+userId)
                 button mypage
 
         ul  
@@ -23,6 +22,6 @@ html
                     img= item[4]
                     a(href='/update/'+item[0]+'/'+item[1])
                         button Comment
-                    a(href='/deleteComment/'+item[0]+'/'+item[1])
-                        button Delete
-            li end
+                    if userId == item[0]
+                        a(href='/deleteComment/'+item[0]+'/'+item[1])
+                            button Delete

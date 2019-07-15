@@ -65,11 +65,6 @@ app.post('/SignUpProc', function(request, response) {
     db.execute('INSERT INTO ADEUSER (NAME, EMAIL, PW) VALUES (:1, :2, :3)'
     , [body.name, body.email, body.pw]
     , function(error, results) {
-        console.log('sign up');
-        console.log(request.body.name);
-        console.log(request.body.email);
-        console.log(request.body.pw);
-        console.log(results);
         response.redirect('/');
     });
 });
@@ -103,6 +98,20 @@ app.post('/SignInProc', function(request, response) {
             response.redirect('/SignIn');
         }
         
+    });
+});
+
+// myPage
+app.get('/myPage/:id', function(request, response) {
+    console.log('mypage');
+    db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime'
+    , [request.params.id]
+    , function(error, results) {
+        response.render('myPage', {
+            data: results.rows,
+            userName: userName
+        });
+        console.log(results);
     });
 });
 
