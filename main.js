@@ -52,10 +52,10 @@ app.get('/', function(request, response) {
             userId : userId,
             userName : userName
         });
-        console.log(results);
     });
 });
 
+// Sign up
 app.get('/SignUp', function(request, response) {
     response.render('SignUp');
 });
@@ -73,47 +73,40 @@ app.post('/SignUpProc', function(request, response) {
         response.redirect('/');
     });
 });
-/*
-app.post('/SignUpProc', function(request, response) {
-    var body = request.body;
-    db.query('INSERT INTO user (name, email, pw) VALUES (?, ?, ?)'
-    , [body.name, body.email, body.pw]
-    , function(error, results) {
-        response.redirect('/');
-    });
-});
 
-// sign in
+// Sign in
 app.get('/SignIn', function(request, response) {
-    fs.readFile('html/SignIn.html', 'utf8', function(error, results) {
-        response.send(results);
-    });
+    response.render('SignIn');
 });
 
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
     var email = body.email;
-    db.query('SELECT id, pw, name FROM user WHERE email = ?'
+    db.execute('SELECT * FROM adeuser WHERE email = :1'
     , [email]
     , function(error, results) {
-        if(body.pw == results[0].pw){ // login success
-            // alert you succeed
+        if(body.pw == results.rows[0][3]) 
+        { // login success
+            // alert succeed!
             response.cookie('userEmail', email);
-            response.cookie('userId', results[0].id);
-            response.cookie('userName', results[0].name);
+            response.cookie('userId', results.rows[0][0]);
+            response.cookie('userName', results.rows[0][1]);
             userId = request.cookies.userId;
             userName = request.cookies.userName;
             isLogin = true;
-
+            
             response.redirect('/');
         }
-        else { // failed
+        else 
+        { // fail to log in
             // alert something you wrong
             response.redirect('/SignIn');
         }
+        
     });
 });
 
+/*
 // mypage
 app.get('/myPage/:id', function(request, response) {
     fs.readFile('html/myPage.html', 'utf8', function(error, data) {
