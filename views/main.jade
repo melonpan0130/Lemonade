@@ -1,0 +1,23 @@
+html
+    head
+        title Lemonade
+        script.
+            console.log('isLogin');
+    body
+        h1 Lemonade
+        unless isLogin
+            a(href='/SignUp')
+                button Sign up
+            a(href='/SignIn')
+                button Sign in
+        else
+            a(href='/myPage/')
+                button mypage
+        
+        ul
+          - var items = [1,2,3,4,5]
+            each item in items
+                li
+                    p= item
+                    p= item
+            li end

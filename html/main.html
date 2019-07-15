@@ -16,14 +16,15 @@
     <% } %>
 
     <ul>
-    <% data.forEach(function(item, index) { %>
+        <% data.forEach(function(item, index) { %>
         <li>
-            <p><%= item.userName %></p>
+            <p><%= item.id %></p>
             <a href=<%="/lemon/"+item.userId+"/"+item.id %>><p><%= item.title %></p></a>
             <p><%= item.content %></p>
             <p><%= item.img %></p>
+            <a href=<%="/update/"+item.id %>><button>Comment</button></a>
+            <a href=<%="/deleteComment/"+item.id %>><button>Delete</button></a>
         </li>
-    <% }) %> 
     </ul>
 </body>
 </html>

@@ -10,8 +10,9 @@ var isLogin = false;
 var userId = null;
 var userName = null;
 
+// connect oracle DB
 var oracle = require('oracledb');
-var con;
+var db;
 oracle.autoCommit = true;
 oracle.getConnection({
     user     : 'LEMON',
@@ -21,20 +22,14 @@ oracle.getConnection({
     if(err){
         console.log('DB error', err);
     }
-    con = conn;
+    db = conn;
 });
 
-/*
-var mysql = require('mysql');
-var db = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '1234',
-    database : 'studynodejs'
-});
-db.connect();
-*/
 var app = express();
+app.set('view engine', 'jade');
+app.set('views', './views');
+app.locals.pretty = true;
+
 app.use(bodyParser.urlencoded({
     extended: false 
 })).listen(3000, function() {
@@ -42,22 +37,36 @@ app.use(bodyParser.urlencoded({
 });
 
 app.use(cookieParser());
-/*
+
 app.get('/', function(request, response) {
-    fs.readFile('html/main.html', 'utf8', function(error, data) {
-        db.query('SELECT * FROM board ORDER BY id DESC', function(error, results) {
+    // fs.readFile('main', 'utf8', function(error, data) {
+        /*
+        response.render('main', {
+            isLogin : false
+        });
+        */
+        db.execute('SELECT * FROM board ORDER BY id DESC', function(error, results) {
+            
+            response.render('main', {
+                data: results,
+                isLogin : isLogin,
+                userId : userId,
+                userName : userName
+            });
+            console.log(results);
+            /*
             response.send(ejs.render(data, {
                 data : results,
                 isLogin : isLogin,
                 userId : userId,
                 userName : userName
-            }));
+            }));*/
             console.log('helo');
         });
-    });
+    // });
 });
-*/
 
+/*
 app.get('/', function(request, response) {
     fs.readFile('html/main.html', 'utf8', function(error, data){
         con.exe
@@ -211,3 +220,5 @@ app.get('/deleteComment/:userId/:boardId/:commentId', function(request, response
         console.log(data);
     });
 });
+
+*/
