@@ -17,7 +17,7 @@ oracle.autoCommit = true;
 oracle.getConnection({
     user     : 'LEMON',
     password : '1234',
-    host     : 'localhost'
+    connectString : '127.0.0.1'
 }, function(err, conn) { 
     if(err){
         console.log('DB error', err);
@@ -45,15 +45,20 @@ app.get('/', function(request, response) {
             isLogin : false
         });
         */
-        db.execute('SELECT * FROM board ORDER BY id DESC', function(error, results) {
+        db.execute(`SELECT * FROM BOARD ORDER BY CREATETIME DESC`
+        , []
+        , function(error, results) {
+            if(error)
+                console.log(error);
             
             response.render('main', {
-                data: results,
+                data: results.rows,
                 isLogin : isLogin,
                 userId : userId,
                 userName : userName
             });
             console.log(results);
+
             /*
             response.send(ejs.render(data, {
                 data : results,

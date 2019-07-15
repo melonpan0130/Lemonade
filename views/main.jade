@@ -14,10 +14,15 @@ html
             a(href='/myPage/')
                 button mypage
         
-        ul
-          - var items = [1,2,3,4,5]
-            each item in items
+        ul  
+            each item in data
                 li
-                    p= item
-                    p= item
+                    a(href='/lemon/'+item[0]+'/'+item[1])
+                        h3= item[2]
+                    p= item[3]
+                    img= item[4]
+                    a(href='/update/'+item[0]+'/'+item[1])
+                        button Comment
+                    a(href='/deleteComment/'+item[0]+'/'+item[1])
+                        button Delete
             li end
