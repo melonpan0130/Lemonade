@@ -19,9 +19,8 @@ oracle.getConnection({
     password : '1234',
     connectString : '127.0.0.1'
 }, function(err, conn) { 
-    if(err){
-        console.log('DB error', err);
-    }
+    if(err)
+        console.log(err);
     db = conn;
 });
 
@@ -103,7 +102,6 @@ app.post('/SignInProc', function(request, response) {
 
 // myPage
 app.get('/myPage/:id', function(request, response) {
-    console.log('mypage');
     db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime'
     , [request.params.id]
     , function(error, results) {
@@ -111,7 +109,6 @@ app.get('/myPage/:id', function(request, response) {
             data: results.rows,
             userName: userName
         });
-        console.log(results);
     });
 });
 
@@ -121,8 +118,19 @@ app.get('/insert', function(request, response) {
 })
 
 app.post('/insert', function(request, response) {
-    
+    var body = request.body;
+    db.execute('SELECT COUNT(*) FROM board WHERE userId = :1'
+    , [userId]
+    , function(error, id) {
+        db.execute('INSERT INTO board (userId, id, title, content) VALUES (:1, :2, :3, :4)'
+        , [userId, (id.rows[0][0]+1), body.title, body.content]
+        , function(error, results) {
+            response.redirect('/myPage/'+userId);
+        }); // insert
+    });
 });
+
+
 
 /*
 app.post('/insert', function(request, response) {
