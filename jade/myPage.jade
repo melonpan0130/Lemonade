@@ -14,7 +14,9 @@ html
                         h3= item[2]
                     p= item[3]
                     img= item[4]
-                    a(href='/update/'+item[0]+'/'+item[1])
+                    a(href='/comment/'+item[1])
                         button Comment
-                    a(href='/deleteComment/'+item[0]+'/'+item[1])
+                    a(href='/updateBoard/'+item[1])
+                        button Edit
+                    a(href='/deleteBoard/'+item[1])
                         button Delete

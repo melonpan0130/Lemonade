@@ -1,0 +1,14 @@
+html
+    head
+    body
+        a(href='/')
+            h3 Lemonade
+        h1 Lemonade-Edit Board
+        form(method="post")
+            label(for="title") title
+            input(type="text" name="title" placeholder="title" value=title)
+            br
+            label(for="content") content
+            textarea(name="content", cols="30", rows="10" placeholder="content")= content
+            br
+            input(type="submit" value="EDIT")

@@ -11,13 +11,14 @@ var userId = null;
 var userName = null;
 
 // connect oracle DB
-var oracle = require('oracledb');
+var oracle = require('oracledb'); // oracle 연동
 var db;
 oracle.autoCommit = true;
-oracle.getConnection({
-    user     : 'LEMON',
-    password : '1234',
-    connectString : '127.0.0.1'
+
+oracle.getConnection({ 
+    user     : 'LEMON', // lemon 사용자
+    password : '1234', // 비밀번호
+    connectString : '127.0.0.1' // host
 }, function(err, conn) { 
     if(err)
         console.log(err);
@@ -26,8 +27,8 @@ oracle.getConnection({
 
 // app setting
 var app = express();
-app.set('view engine', 'jade');
-app.set('views', './views');
+app.set('view engine', 'jade'); // 기본 파일로 jade를 사용
+app.set('views', './jade'); // jade폴더 안의 뷰를 사용
 app.locals.pretty = true;
 
 app.use(bodyParser.urlencoded({
@@ -35,9 +36,9 @@ app.use(bodyParser.urlencoded({
 })).listen(3000, function() {
     console.log('Success');
 });
-
 app.use(cookieParser());
 
+// '/'로 접근했을 때
 app.get('/', function(request, response) {
     db.execute('SELECT * FROM BOARD ORDER BY CREATETIME DESC'
     , []
@@ -46,7 +47,7 @@ app.get('/', function(request, response) {
             console.log(error);
         
         response.render('main', {
-            data: results.rows,
+            data: results.rows, // DB값을 보냄
             isLogin : isLogin,
             userId : userId,
             userName : userName
@@ -73,6 +74,7 @@ app.get('/SignIn', function(request, response) {
     response.render('SignIn');
 });
 
+// Sign in의 결과를 처리
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
     var email = body.email;
@@ -80,8 +82,8 @@ app.post('/SignInProc', function(request, response) {
     , [email]
     , function(error, results) {
         if(body.pw == results.rows[0][3]) 
-        { // login success
-            // alert succeed!
+        { 
+            // 로그인 성공!
             response.cookie('userEmail', email);
             response.cookie('userId', results.rows[0][0]);
             response.cookie('userName', results.rows[0][1]);
@@ -92,21 +94,20 @@ app.post('/SignInProc', function(request, response) {
             response.redirect('/');
         }
         else 
-        { // fail to log in
-            // alert something you wrong
-            response.redirect('/SignIn');
+        { 
+            // 로그인 실패!
+            response.redirect('/SignIn'); // 다시 되돌려 보냄
         }
-        
     });
 });
 
 // myPage
 app.get('/myPage/:id', function(request, response) {
-    db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime'
+    db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime DESC'
     , [request.params.id]
     , function(error, results) {
         response.render('myPage', {
-            data: results.rows,
+            data: results.rows, // DB값을 보냄
             userName: userName
         });
     });
@@ -121,7 +122,9 @@ app.post('/insert', function(request, response) {
     var body = request.body;
     db.execute('SELECT COUNT(*) FROM board WHERE userId = :1'
     , [userId]
-    , function(error, id) {
+    , function(error, id) { 
+        // boardid값을 설정하는 것이 목적.
+        // 같은 사용자 내에서만 숫자가 증가하도록 설정.
         db.execute('INSERT INTO board (userId, id, title, content) VALUES (:1, :2, :3, :4)'
         , [userId, (id.rows[0][0]+1), body.title, body.content]
         , function(error, results) {
@@ -130,33 +133,66 @@ app.post('/insert', function(request, response) {
     });
 });
 
+app.get('/lemon/:userId/:boardId', function(request, response) {
+    var userId = request.params.userId; // url에서 userId값 추출
+    var boardId = request.params.boardId; // url에서 boardId값 추출
 
+    db.execute('SELECT * FROM board WHERE userId = :1 AND id = :2'
+    , [userId, boardId]
+    , function(error, board) {
 
-/*
-app.post('/insert', function(request, response) {
-    var body = request.body;
+        db.execute('SELECT * FROM comment WHERE userId = :1 AND boardId = :2'
+        , [userId, boardId]
+        , function(error2, comments) {
 
-    db.query('INSERT INTO board (userId, title, content) VALUES (?, ?, ?)'
-    , [userId, body.title, body.content]
-    , function(error, data) {
-        response.redirect('/myPage/'+userId);
+            db.execute('SELECT name FROM adeuser WHERE id = :1'
+            , [board.rows[0][0]]
+            , function(error3, username) {
+                response.render('lemon', {
+                    data : board.rows[0],
+                    name : username.rows[0][0],
+                    comment : comments
+                });
+            });
+        });
     });
-});
+})
 
-// edit board in mypage ; /edit/boardId
-app.get('/update/:id', function(request, response) {
-    fs.readFile('html/updateBoard.html', 'utf8'
-    , function(error, data) {
-        db.query('SELECT * FROM board WHERE userid = ? AND id = ?'
-        , [userId, request.params.id]
-        , function(error, results) {
-            response.send(ejs.render(data, {
-                data : results[0]
-            }));
+
+// update board
+app.get('/updateBoard/:id', function(request, response) {
+    db.execute('SELECT * FROM board WHERE userid = :1 AND id = :2'
+    , [userId, request.params.id]
+    , function(error, results) {
+        response.render('updateBoard', {
+            title : results.rows[0][2],
+            content : results.rows[0][3]
         });
     });
 });
 
+app.post('/updateBoard/:id', function(request, response) {
+    var body = request.body;
+    db.execute('UPDATE board SET title = :1, content = :2 WHERE userid = :3 and id=:4'
+    , [body.title, body.content, userId, request.params.id]
+    , function(error, results) {
+        response.redirect('/myPage/'+userId);
+    });
+});
+
+// delete board
+app.get('/deleteBoard/:userId/:boardId', function(request, response) {
+    var userid = request.params.userId;
+    var boardid = request.params.boardId;
+    db.execute('DELETE FROM board WHERE userId = :1 AND boardId = :2'
+    , [userid, boardid]
+    , function(error, results) {
+
+    });
+});
+
+
+/*
 app.post('/update/:id', function(request, response) {
     var body = request.body;
 
@@ -175,41 +211,4 @@ app.get('/delete/:id', function(request, response) {
         response.redirect('/myPage/'+userId);
     });
 });
-
-// connect to board ; /lemon/userId/boardId
-app.get('/lemon/:userId/:boardId', function(request, response) {
-    var userId = request.params.userId;
-    var boardId = request.params.boardId;
-    fs.readFile('html/lemon.html', 'utf8', function(error, data){
-        db.query('SELECT * FROM board WHERE userId = ? AND id = ?'
-        , [userId, boardId]
-        , function(err, content) {
-            db.query('SELECT * FROM comment WHERE userId = ? AND boardId = ?'
-            , [userId, boardId]
-            ,function(err2, comments) {
-                console.log(err2);
-                console.log(comments);
-                response.send(ejs.render(data, {
-                    comment : comments,
-                    data : content[0]
-                }));
-            });
-        });
-    });
-});
-
-app.get('/deleteComment/:userId/:boardId/:commentId', function(request, response) {
-    var userId = request.params.userId;
-    var boardId = request.params.boardId;
-    var commentId =  request.params.commentId;
-    console.log('userID : '+userId);
-    console.log('boardId : '+boardId);
-    console.log('commentId : '+commentId);
-    db.query('DELETE FROM comment WHERE userId = ? AND boardId = ? AND id = ?'
-    , [userId, boardId, commentId]
-    ,function(error, data) {
-        console.log(data);
-    });
-});
-
 */
