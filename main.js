@@ -118,6 +118,7 @@ app.get('/insert', function(request, response) {
     response.render('insertBoard');
 })
 
+// insert board proc
 app.post('/insert', function(request, response) {
     var body = request.body;
     db.execute('SELECT COUNT(*) FROM board WHERE userId = :1'
@@ -171,6 +172,7 @@ app.get('/updateBoard/:id', function(request, response) {
     });
 });
 
+// 
 app.post('/updateBoard/:id', function(request, response) {
     var body = request.body;
     db.execute('UPDATE board SET title = :1, content = :2 WHERE userid = :3 and id=:4'
@@ -181,34 +183,13 @@ app.post('/updateBoard/:id', function(request, response) {
 });
 
 // delete board
-app.get('/deleteBoard/:userId/:boardId', function(request, response) {
-    var userid = request.params.userId;
+app.get('/deleteBoard/:boardId', function(request, response) {
     var boardid = request.params.boardId;
-    db.execute('DELETE FROM board WHERE userId = :1 AND boardId = :2'
-    , [userid, boardid]
+    db.execute('DELETE FROM board WHERE userId = :1 AND id = :2'
+    , [userId, boardid]
     , function(error, results) {
-
+        // 이전페이지로 이동시키기
+        response.redirect('/');
+        // response.redirect('/myPage/'+userId);
     });
 });
-
-
-/*
-app.post('/update/:id', function(request, response) {
-    var body = request.body;
-
-    db.query('UPDATE board SET title = ?, content = ? WHERE id = ?'
-    , [body.title, body.content, request.params.id]
-    , function(error, data) {
-        response.redirect('/myPage/'+userId);
-    });
-}); 
-
-// delete board in mypage ; /delete/boardId
-app.get('/delete/:id', function(request, response) {
-    db.query('DELETE FROM board WHERE userId = ? AND id = ?'
-    , [userId, request.params.id]
-    , function(){
-        response.redirect('/myPage/'+userId);
-    });
-});
-*/
