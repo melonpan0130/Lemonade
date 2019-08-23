@@ -6,3 +6,11 @@ html
         h1= data[2]
         p= name
         p= data[3]
+        form(action='/comment/'+data[0]+'/'+data[1], method="post")
+            textarea(name="comment", cols="50", rows="5" placeholder="Content")
+            button(type="submit") Comment
+        ul
+            each comm in comment
+                li
+                    p= comm[2]
+                    p= comm[4]

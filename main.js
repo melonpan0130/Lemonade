@@ -6,7 +6,6 @@ var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var isLogin = false;
 var userId = null;
 var userName = null;
 
@@ -29,7 +28,7 @@ oracle.getConnection({
 var app = express();
 app.set('view engine', 'jade'); // 기본 파일로 jade를 사용
 app.set('views', './jade'); // jade폴더 안의 뷰를 사용
-app.locals.pretty = true;
+app.locals.pretty = true; 
 
 app.use(bodyParser.urlencoded({
     extended: false 
@@ -45,10 +44,12 @@ app.get('/', function(request, response) {
     , function(error, results) {
         if(error)
             console.log(error);
+        userId = request.cookies.userId;
+        userName = request.cookies.userName;
         
         response.render('main', {
             data: results.rows, // DB값을 보냄
-            isLogin : isLogin,
+            isLogin : userId,
             userId : userId,
             userName : userName
         });
@@ -65,7 +66,7 @@ app.post('/SignUpProc', function(request, response) {
     db.execute('INSERT INTO ADEUSER (NAME, EMAIL, PW) VALUES (:1, :2, :3)'
     , [body.name, body.email, body.pw]
     , function(error, results) {
-        response.redirect('/');
+        response.redirect('/'); 
     });
 });
 
@@ -77,28 +78,29 @@ app.get('/SignIn', function(request, response) {
 // Sign in의 결과를 처리
 app.post('/SignInProc', function(request, response) {
     var body = request.body;
-    var email = body.email;
     db.execute('SELECT * FROM adeuser WHERE email = :1'
-    , [email]
+    , [body.email]
     , function(error, results) {
-        if(body.pw == results.rows[0][3]) 
-        { 
+        console.log(results.rows);
+        if(results.rows != [] && body.pw == results.rows[0][3]) { 
             // 로그인 성공!
-            response.cookie('userEmail', email);
             response.cookie('userId', results.rows[0][0]);
             response.cookie('userName', results.rows[0][1]);
-            userId = request.cookies.userId;
-            userName = request.cookies.userName;
-            isLogin = true;
             
             response.redirect('/');
         }
         else 
-        { 
-            // 로그인 실패!
+        {  // 로그인 실패!
             response.redirect('/SignIn'); // 다시 되돌려 보냄
         }
     });
+});
+
+app.get('/logout/:userId', function(request, response) {
+    response.clearCookie('userId');
+    response.clearCookie('userName');
+
+    response.redirect('/');
 });
 
 // myPage
@@ -125,11 +127,15 @@ app.post('/insert', function(request, response) {
     , [userId]
     , function(error, id) { 
         // boardid값을 설정하는 것이 목적.
-        // 같은 사용자 내에서만 숫자가 증가하도록 설정.
+        // 같은 사용자 내에서만 숫자가 증가하도록 설정. -> make function later
         db.execute('INSERT INTO board (userId, id, title, content) VALUES (:1, :2, :3, :4)'
         , [userId, (id.rows[0][0]+1), body.title, body.content]
         , function(error, results) {
             response.redirect('/myPage/'+userId);
+            console.log('title');
+            console.log(body.title);
+            console.log('content');
+            console.log(body.content);
         }); // insert
     });
 });
@@ -142,17 +148,17 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
     , [userId, boardId]
     , function(error, board) {
 
-        db.execute('SELECT * FROM comment WHERE userId = :1 AND boardId = :2'
+        db.execute('SELECT * FROM comments WHERE userId = :1 AND boardId = :2'
         , [userId, boardId]
         , function(error2, comments) {
-
+            console.log(comments);
             db.execute('SELECT name FROM adeuser WHERE id = :1'
             , [board.rows[0][0]]
             , function(error3, username) {
                 response.render('lemon', {
                     data : board.rows[0],
                     name : username.rows[0][0],
-                    comment : comments
+                    comment : comments.rows
                 });
             });
         });
@@ -189,7 +195,20 @@ app.get('/deleteBoard/:boardId', function(request, response) {
     , [userId, boardid]
     , function(error, results) {
         // 이전페이지로 이동시키기
-        response.redirect('/');
-        // response.redirect('/myPage/'+userId);
+        console.log('delete');
+        // response.redirect('/');
+        response.redirect('/myPage/'+userId);
     });
+});
+
+// comment 댓글 달기
+app.post('/comment/:id/:boardId', function(request, response) {
+    var body = request.body;
+    var params = request.params;
+    
+    db.execute('INSERT INTO comments(userId, boardId, writerId, content) VALUES(:1, :2, :3, :4)'
+    ,[params.id, params.boardId, userId, body.comment]
+    , function(error, results) {
+        response.redirect('/lemon/'+params.id+'/'+params.boardId);
+    })
 });
