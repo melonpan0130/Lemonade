@@ -4,7 +4,7 @@ html
         script.
     body
         h1 Lemonade
-        unless isLogin 
+        unless userId 
             a(href='/SignUp')
                 button Sign up
             a(href='/SignIn')
@@ -22,8 +22,11 @@ html
                         h3= item[2]
                     p= item[3]
                     img= item[4]
-                    //-a(href='/comment/'+item[0]+'/'+item[1])
-                        button Comment
+                    if userId != null
+                        form(action="/comment/"+item[0]+'/'+item[1] method="post")
+                            input(type="text" name="comment")
+                        //- a(href='/comment/'+item[0]+'/'+item[1])
+                            button Comment
                     if userId == item[0]
                         a(href='/updateBoard/'+item[1])
                             button Edit

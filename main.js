@@ -49,7 +49,6 @@ app.get('/', function(request, response) {
         
         response.render('main', {
             data: results.rows, // DB값을 보냄
-            isLogin : userId,
             userId : userId,
             userName : userName
         });
@@ -100,6 +99,9 @@ app.get('/logout/:userId', function(request, response) {
     response.clearCookie('userId');
     response.clearCookie('userName');
 
+    userId = null;
+    userName = null;
+
     response.redirect('/');
 });
 
@@ -147,18 +149,28 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
     db.execute('SELECT * FROM board WHERE userId = :1 AND id = :2'
     , [userId, boardId]
     , function(error, board) {
-
-        db.execute('SELECT * FROM comments WHERE userId = :1 AND boardId = :2'
+        /*
+    select c.id, a.name, c.content
+  2  from comments c
+  3  right join adeuser
+  4  a
+  5  on a.id=c.writerid
+  6  where c.id = 24;
+  */
+        db.execute('SELECT * FROM comments WHERE userId = :1 AND boardId = :2 ORDER BY id DESC'
         , [userId, boardId]
         , function(error2, comments) {
             console.log(comments);
+            
             db.execute('SELECT name FROM adeuser WHERE id = :1'
             , [board.rows[0][0]]
             , function(error3, username) {
+
                 response.render('lemon', {
                     data : board.rows[0],
+                    userId : request.cookies.userId,
                     name : username.rows[0][0],
-                    comment : comments.rows
+                    comment : comments.rows,
                 });
             });
         });
@@ -209,6 +221,17 @@ app.post('/comment/:id/:boardId', function(request, response) {
     db.execute('INSERT INTO comments(userId, boardId, writerId, content) VALUES(:1, :2, :3, :4)'
     ,[params.id, params.boardId, userId, body.comment]
     , function(error, results) {
+        // history.go(-1);
         response.redirect('/lemon/'+params.id+'/'+params.boardId);
     })
 });
+
+// DeleteComment 댓글 삭제
+app.get('/DeleteComment/:id/:boardId/:commentId', function(request, response) {
+    var params = request.params;
+    db.execute('DELETE FROM comments WHERE userId = :1 AND boardId = :2 AND id = :3'
+    , [params.id, params.boardId, params.commentId]
+    , function(error, results) {
+        response.redirect('/lemon/'+params.id+'/'+params.boardId);
+    });
+})

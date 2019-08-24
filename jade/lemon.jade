@@ -6,11 +6,17 @@ html
         h1= data[2]
         p= name
         p= data[3]
-        form(action='/comment/'+data[0]+'/'+data[1], method="post")
-            textarea(name="comment", cols="50", rows="5" placeholder="Content")
-            button(type="submit") Comment
+        unless userId
+            p You have to login if you want to leave comment ;(
+        else
+            form(action='/comment/'+data[0]+'/'+data[1] method="post")
+                textarea(name="comment", cols="50", rows="5" placeholder="Comment")
+                button(type="submit" onclick="history.back()") Comment
         ul
             each comm in comment
                 li
                     p= comm[2]
                     p= comm[4]
+                    if userId == comm[3]
+                        a(href='/DeleteComment/'+comm[0]+'/'+comm[1]+'/'+comm[2])
+                            button Delete
