@@ -55,6 +55,32 @@ app.get('/', function(request, response) {
     });
 });
 
+// search product
+app.post('/', function(request, response) {
+    var option = request.body.option;
+    var where;
+
+    if(option == 'all') where = 'userid = :1 OR title = :1';
+    else if(option == 'product') where = 'item = :1'; // make item culumn later..
+    else if(option == 'seller') where = 'userid = :1';
+    else if(option == 'title') where = 'title = :1';
+
+    db.execute('SELECT * FROM BOARD WHERE '+where+' ORDER BY CREATETIME DESC'
+    , [request.body.search]
+    , function(error, results) {
+        if(error)
+            console.log(error);
+        userId = request.cookies.userId;
+        userName = request.cookies.userName;
+        
+        response.render('main', {
+            data: results.rows, // DB값을 보냄
+            userId : userId,
+            userName : userName
+        });
+    });
+});
+
 // Sign up
 app.get('/SignUp', function(request, response) {
     response.render('SignUp');

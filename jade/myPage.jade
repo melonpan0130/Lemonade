@@ -10,8 +10,7 @@ html
         ul
             each item in data
                 li
-                    a(href='/lemon/'+item[0]+'/'+item[1])
-                        h3= item[2]
+                    a(href='/lemon/'+item[0]+'/'+item[1]): h3= item[2]
                     p= item[3]
                     img= item[4]
                     a(href='/comment/'+item[1])
