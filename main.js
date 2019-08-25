@@ -149,16 +149,8 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
     db.execute('SELECT * FROM board WHERE userId = :1 AND id = :2'
     , [userId, boardId]
     , function(error, board) {
-        /*
-    select c.id, a.name, c.content
-  2  from comments c
-  3  right join adeuser
-  4  a
-  5  on a.id=c.writerid
-  6  where c.id = 24;
-  */
-        db.execute('SELECT * FROM comments WHERE userId = :1 AND boardId = :2 ORDER BY id DESC'
-        , [userId, boardId]
+        db.execute('SELECT c.id, a.name, c.content FROM comments c RIGHT JOIN adeuser a ON a.id = c.writerid WHERE c.boardid = :1 ORDER BY c.id DESC'
+        , [boardId]
         , function(error2, comments) {
             console.log(comments);
             
