@@ -1,0 +1,12 @@
+a(href="/"): h1 Lemonade
+unless userId 
+    a(href='/SignUp')
+        button Sign up
+    a(href='/SignIn')
+        button Sign in
+else 
+    p Welcome, #{userName}!
+    a(href='/myPage/'+userId)
+        button mypage
+    a(href="/logout/"+userId)
+        button Log out

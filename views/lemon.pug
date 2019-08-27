@@ -16,7 +16,7 @@ html
             each comm in comment
                 li
                     p= comm[0]
-                    p= comm[1]
+                    a(href="/myPage/"+comm[4])= comm[1]
                     p= comm[2]
                     if userId == comm[3]
                         a(href='/DeleteComment/'+comm[0]+'/'+comm[1]+'/'+comm[2])

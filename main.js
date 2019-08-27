@@ -5,6 +5,7 @@ var ejs = require('ejs');
 var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var multer = require('multer');
 
 var userId = null;
 var userName = null;
@@ -26,8 +27,8 @@ oracle.getConnection({
 
 // app setting
 var app = express();
-app.set('view engine', 'jade'); // 기본 파일로 jade를 사용
-app.set('views', './jade'); // jade폴더 안의 뷰를 사용
+app.set('view engine', 'pug'); // 기본 파일로 pug를 사용
+app.set('views', './views'); // views 폴더 안의 뷰를 사용
 app.locals.pretty = true; 
 
 app.use(bodyParser.urlencoded({
@@ -37,18 +38,60 @@ app.use(bodyParser.urlencoded({
 });
 app.use(cookieParser());
 
+// upload images
+app.get('/images/:filename', (req, res) => {
+    fs.readFile('./images/'+req.params.filename, (error, data) => {
+      res.writeHead(200, { 'Content-Type': 'image/png'});
+      res.end(data);
+    })
+});
+
+/* Create new image 
+app.post('saveimg/:filename', function(req, res, next) {
+    upload(req, res).then(function (file) {
+      res.json(file);
+    }, function (err) {
+      res.send(500, err);
+    });
+});
+
+var upload = function (req, res) {
+    var deferred = Q.defer();
+    var storage = multer.diskStorage({
+      // 서버에 저장할 폴더
+      destination: function (req, file, cb) {
+        cb(null, imagePath);
+      },
+  
+      // 서버에 저장할 파일 명
+      filename: function (req, file, cb) {
+        file.uploadedFile = {
+          name: req.params.filename,
+          ext: file.mimetype.split('/')[1]
+        };
+        cb(null, file.uploadedFile.name + '.' + file.uploadedFile.ext);
+      }
+    });
+  
+    var upload = multer({ storage: storage }).single('file');
+    upload(req, res, function (err) {
+      if (err) deferred.reject();
+      else deferred.resolve(req.file.uploadedFile);
+    });
+    return deferred.promise;
+};
+*/
+
 // '/'로 접근했을 때
 app.get('/', function(request, response) {
     db.execute('SELECT * FROM BOARD ORDER BY CREATETIME DESC'
     , []
-    , function(error, results) {
-        if(error)
-            console.log(error);
+    , function(error, board) {
         userId = request.cookies.userId;
         userName = request.cookies.userName;
         
         response.render('main', {
-            data: results.rows, // DB값을 보냄
+            board: board.rows, // DB값을 보냄
             userId : userId,
             userName : userName
         });
@@ -156,14 +199,13 @@ app.post('/insert', function(request, response) {
     , function(error, id) { 
         // boardid값을 설정하는 것이 목적.
         // 같은 사용자 내에서만 숫자가 증가하도록 설정. -> make function later
-        db.execute('INSERT INTO board (userId, id, title, content) VALUES (:1, :2, :3, :4)'
-        , [userId, (id.rows[0][0]+1), body.title, body.content]
+        db.execute('INSERT INTO board (userId, id, title, content, img) VALUES (:1, :2, :3, :4, :5)'
+        , [userId, (id.rows[0][0]+1), body.title, body.content, body.img]
         , function(error, results) {
             response.redirect('/myPage/'+userId);
-            console.log('title');
+            console.log('insert');
             console.log(body.title);
-            console.log('content');
-            console.log(body.content);
+            console.log(body.img);
         }); // insert
     });
 });
@@ -175,11 +217,9 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
     db.execute('SELECT * FROM board WHERE userId = :1 AND id = :2'
     , [userId, boardId]
     , function(error, board) {
-        db.execute('SELECT c.id, a.name, c.content FROM comments c RIGHT JOIN adeuser a ON a.id = c.writerid WHERE c.boardid = :1 ORDER BY c.id DESC'
+        db.execute('SELECT c.id, a.name, c.content, a.id FROM comments c RIGHT JOIN adeuser a ON a.id = c.writerid WHERE c.boardid = :1 ORDER BY c.id DESC'
         , [boardId]
         , function(error2, comments) {
-            console.log(comments);
-            
             db.execute('SELECT name FROM adeuser WHERE id = :1'
             , [board.rows[0][0]]
             , function(error3, username) {
@@ -253,3 +293,20 @@ app.get('/DeleteComment/:id/:boardId/:commentId', function(request, response) {
         response.redirect('/lemon/'+params.id+'/'+params.boardId);
     });
 })
+
+app.get('/heart/:userId/:boardId', function(request, response) {
+    // cookie!
+    var userId = request.params.userId;
+    var boardId = request.params.boardId;
+    db.execute('SELECT COUNT(*) FROM heart WHERE likeId = :1'
+    , [request.cookies.userId]
+    , function(error, heartId) {
+        console.log(heartId);
+        db.execute('INSERT INTO heart VALUES (:1, :2, :3, :4)'
+        , [heartId.rows[0][0]+1, request.cookies.userId, userId, boardId]
+        , function(error, hearts) {
+            console.log(heartId.rows[0][0]+1);
+            response.redirect('/lemon/'+userId+'/'+boardId);
+        })
+    })
+});
