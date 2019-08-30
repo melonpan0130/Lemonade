@@ -199,7 +199,7 @@ app.post('/insert', function(request, response) {
     , function(error, id) { 
         // boardid값을 설정하는 것이 목적.
         // 같은 사용자 내에서만 숫자가 증가하도록 설정. -> make function later
-        db.execute('INSERT INTO board (userId, id, title, content, img) VALUES (:1, :2, :3, :4, :5)'
+        db.execute('INSERT INTO board (userId, boardid, title, content, img) VALUES (:1, :2, :3, :4, :5)'
         , [userId, (id.rows[0][0]+1), body.title, body.content, body.img]
         , function(error, results) {
             response.redirect('/myPage/'+userId);
@@ -214,13 +214,13 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
     var userId = request.params.userId; // url에서 userId값 추출
     var boardId = request.params.boardId; // url에서 boardId값 추출
 
-    db.execute('SELECT * FROM board WHERE userId = :1 AND id = :2'
+    db.execute('SELECT * FROM board WHERE userId = :1 AND boardid = :2'
     , [userId, boardId]
     , function(error, board) {
-        db.execute('SELECT c.id, a.name, c.content, a.id FROM comments c RIGHT JOIN adeuser a ON a.id = c.writerid WHERE c.boardid = :1 ORDER BY c.id DESC'
+        db.execute('SELECT c.commentid, a.name, c.content, a.userid FROM comments c RIGHT JOIN adeuser a ON a.userid = c.writerid WHERE c.boardid = :1 ORDER BY c.commentid DESC'
         , [boardId]
         , function(error2, comments) {
-            db.execute('SELECT name FROM adeuser WHERE id = :1'
+            db.execute('SELECT name FROM adeuser WHERE userid = :1'
             , [board.rows[0][0]]
             , function(error3, username) {
 
@@ -238,7 +238,7 @@ app.get('/lemon/:userId/:boardId', function(request, response) {
 
 // update board
 app.get('/updateBoard/:id', function(request, response) {
-    db.execute('SELECT * FROM board WHERE userid = :1 AND id = :2'
+    db.execute('SELECT * FROM board WHERE userid = :1 AND boardid = :2'
     , [userId, request.params.id]
     , function(error, results) {
         response.render('updateBoard', {
@@ -251,7 +251,7 @@ app.get('/updateBoard/:id', function(request, response) {
 // 
 app.post('/updateBoard/:id', function(request, response) {
     var body = request.body;
-    db.execute('UPDATE board SET title = :1, content = :2 WHERE userid = :3 and id=:4'
+    db.execute('UPDATE board SET title = :1, content = :2 WHERE userid = :3 and boardid=:4'
     , [body.title, body.content, userId, request.params.id]
     , function(error, results) {
         response.redirect('/myPage/'+userId);
@@ -261,7 +261,7 @@ app.post('/updateBoard/:id', function(request, response) {
 // delete board
 app.get('/deleteBoard/:boardId', function(request, response) {
     var boardid = request.params.boardId;
-    db.execute('DELETE FROM board WHERE userId = :1 AND id = :2'
+    db.execute('DELETE FROM board WHERE userId = :1 AND boardid = :2'
     , [userId, boardid]
     , function(error, results) {
         // 이전페이지로 이동시키기
@@ -287,7 +287,7 @@ app.post('/comment/:id/:boardId', function(request, response) {
 // DeleteComment 댓글 삭제
 app.get('/DeleteComment/:id/:boardId/:commentId', function(request, response) {
     var params = request.params;
-    db.execute('DELETE FROM comments WHERE userId = :1 AND boardId = :2 AND id = :3'
+    db.execute('DELETE FROM comments WHERE userId = :1 AND boardId = :2 AND commentid = :3'
     , [params.id, params.boardId, params.commentId]
     , function(error, results) {
         response.redirect('/lemon/'+params.id+'/'+params.boardId);

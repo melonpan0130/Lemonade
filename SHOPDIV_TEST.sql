@@ -2,7 +2,7 @@ SELECT * FROM TAB;
 SELECT * FROM DICT;
 SELECT * FROM USER_INDEXES;
 
--- »ç¿ëÀÚ Á¤ÀÇ ÇÔ¼ö
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ô¼ï¿½
 CREATE OR REPLACE FUNCTION fnSum(n IN NUMBER)
 RETURN NUMBER
 IS 
@@ -15,38 +15,39 @@ END;
 /
 SELECT fnSum(100) FROM dual;
 
--- ÁÖ¹Î¹øÈ£ ÀÌ¿ëÇÏ¿© ¼ºº° ±¸ºÐ
+-- ï¿½Ö¹Î¹ï¿½È£ ï¿½Ì¿ï¿½ï¿½Ï¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 CREATE OR REPLACE FUNCTION fnGender(sn IN VARCHAR)
 RETURN VARCHAR
 IS
-    gen VARCHAR(6) := '¿©ÀÚ';
+    gen VARCHAR(6) := 'ï¿½ï¿½ï¿½ï¿½';
 BEGIN
-    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ÁÖ¹Î¹øÈ£´Â 13ÀÚ¸® ÀÔ´Ï´Ù.'); END IF;
-    IF SUBSTR(sn, 7, 1) IN (1,3) THEN gen := '³²ÀÚ';
+    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ï¿½Ö¹Î¹ï¿½È£ï¿½ï¿½ 13ï¿½Ú¸ï¿½ ï¿½Ô´Ï´ï¿½.'); END IF;
+    IF SUBSTR(sn, 7, 1) IN (1,3) THEN gen := 'ï¿½ï¿½ï¿½ï¿½';
     END IF;
     RETURN gen;
 END;
 /
+
 SELECT fnGender('0101304058829') FROM dual;
 
--- ÁÖ¹Î¹øÈ£¿¡¼­ »ýÀÏ °¡Á®¿À±â
+-- ï¿½Ö¹Î¹ï¿½È£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 CREATE OR REPLACE FUNCTION fnBirth(sn IN VARCHAR)
 RETURN DATE
 IS
 BEGIN
-    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ÁÖ¹Î¹øÈ£´Â 13ÀÚ¸® ÀÔ´Ï´Ù.'); END IF;
+    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ï¿½Ö¹Î¹ï¿½È£ï¿½ï¿½ 13ï¿½Ú¸ï¿½ ï¿½Ô´Ï´ï¿½.'); END IF;
     RETURN TO_DATE(SUBSTR(sn, 1, 6), 'RRMMDD');
 END;
 /
 SELECT fnBirth('0101304058829') FROM dual;
 
--- ÁÖ¹Î¹øÈ£¿¡¼­ ³ªÀÌ °¡Á®¿À±â
+-- ï¿½Ö¹Î¹ï¿½È£ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 CREATE OR REPLACE FUNCTION fnAge(sn IN VARCHAR)
 RETURN NUMBER
 IS
     age NUMBER;
 BEGIN
-    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ÁÖ¹Î¹øÈ£´Â 13ÀÚ¸® ÀÔ´Ï´Ù.'); END IF;
+    IF LENGTH(sn) !=13 THEN RAISE_APPLICATION_ERROR(-20000, 'ï¿½Ö¹Î¹ï¿½È£ï¿½ï¿½ 13ï¿½Ú¸ï¿½ ï¿½Ô´Ï´ï¿½.'); END IF;
     age := TO_NUMBER(TO_CHAR(SYSDATE, 'RRRR') - TO_CHAR(fnBirth(sn), 'RRRR'));
     RETURN age;
 END;
@@ -54,7 +55,7 @@ END;
 
 SELECT fnAge('9701304058829') FROM dual;
 
--- Æ®¸®°Å »ç¿ë
+-- Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 CREATE TABLE tr_main(id VARCHAR(1), value VARCHAR(10));
 CREATE TABLE tr_sub(id VARCHAR(1), value VARCHAR(10));
 
@@ -72,7 +73,7 @@ INSERT INTO tr_main VALUES ('2', 'AAAA');
 SELECT * FROM tr_main;
 SELECT * FROM tr_sub;
 
--- ¼ö°­ ÀÎ¿øÃ¼Å©
+-- ï¿½ï¿½ï¿½ï¿½ ï¿½Î¿ï¿½Ã¼Å©
 CREATE TABLE stdTbl(name VARCHAR(20) NOT NULL, subject VARCHAR(10) DEFAULT 0);
 CREATE TABLE subTbl(subject VARCHAR(10), cnt number(3));
 
@@ -83,10 +84,10 @@ BEGIN
     UPDATE subTbl SET cnt = cnt+1 WHERE subject = :NEW.subject;
 END;
 /
-INSERT INTO subtbl(subject) VALUES ('ÄÄÇ»ÅÍ');
-INSERT INTO subtbl(subject) VALUES ('µðÀÚÀÎ');
-INSERT INTO stdTbl(name, subject) VALUES ('°­¾ÆÁö', 'ÄÄÇ»ÅÍ');
-INSERT INTO stdTbl(name, subject) VALUES ('°í¾çÀÌ', 'ÄÄÇ»ÅÍ');
+INSERT INTO subtbl(subject) VALUES ('ï¿½ï¿½Ç»ï¿½ï¿½');
+INSERT INTO subtbl(subject) VALUES ('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½');
+INSERT INTO stdTbl(name, subject) VALUES ('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½ï¿½Ç»ï¿½ï¿½');
+INSERT INTO stdTbl(name, subject) VALUES ('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½ï¿½Ç»ï¿½ï¿½');
 
 SELECT * FROM stdTbl;
 SELECT * FROM subTbl;
