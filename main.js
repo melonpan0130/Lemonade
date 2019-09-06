@@ -84,14 +84,26 @@ var upload = function (req, res) {
 
 // '/'로 접근했을 때
 app.get('/', function(request, response) {
-    db.execute('SELECT * FROM BOARD ORDER BY CREATETIME DESC'
-    , []
+    db.execute(
+        'SELECT B.USERID, B.BOARDID, B.TITLE, B.CONTENT, (SELECT NAME FROM ADEUSER WHERE USERID = B.USERID), (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID) AS LIKED, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID AND HE.LIKEID = :1) AS ISLIKE FROM BOARD B'
+    , [request.cookies.userId]
     , function(error, board) {
         userId = request.cookies.userId;
         userName = request.cookies.userName;
-        
+        console.log(userId);
+        for(var i=0; i<board.rows.length; i++)
+        console.log(board.rows[i][5]);
         response.render('main', {
             board: board.rows, // DB값을 보냄
+            /*
+            0 USERID
+            1 BOARDID
+            2 TITLE
+            3 CONTENT
+            4 USERNAME
+            5 LIKED COUNT
+            6 Is like? 내가 좋아요를 눌렀는가??
+            */
             userId : userId,
             userName : userName
         });
@@ -117,7 +129,7 @@ app.post('/', function(request, response) {
         userName = request.cookies.userName;
         
         response.render('main', {
-            data: results.rows, // DB값을 보냄
+            board: results.rows, // DB값을 보냄
             userId : userId,
             userName : userName
         });
@@ -149,8 +161,8 @@ app.post('/SignInProc', function(request, response) {
     db.execute('SELECT * FROM adeuser WHERE email = :1'
     , [body.email]
     , function(error, results) {
-        console.log(results.rows);
-        if(results.rows != [] && body.pw == results.rows[0][3]) { 
+        console.log(results);
+        if(body.pw == results.rows[0][3]) { 
             // 로그인 성공!
             response.cookie('userId', results.rows[0][0]);
             response.cookie('userName', results.rows[0][1]);
@@ -298,15 +310,10 @@ app.get('/heart/:userId/:boardId', function(request, response) {
     // cookie!
     var userId = request.params.userId;
     var boardId = request.params.boardId;
-    db.execute('SELECT COUNT(*) FROM heart WHERE likeId = :1'
-    , [request.cookies.userId]
-    , function(error, heartId) {
-        console.log(heartId);
-        db.execute('INSERT INTO heart VALUES (:1, :2, :3, :4)'
-        , [heartId.rows[0][0]+1, request.cookies.userId, userId, boardId]
-        , function(error, hearts) {
-            console.log(heartId.rows[0][0]+1);
-            response.redirect('/lemon/'+userId+'/'+boardId);
-        })
-    })
+
+    db.execute('INSERT INTO heart(userid, boardid, likeid) VALUES (:1, :2, :3)'
+    , [userId, boardId, request.cookies.userId]
+    , function(error, hearts) {
+        response.redirect('/lemon/'+userId+'/'+boardId);
+    });
 });
