@@ -92,7 +92,7 @@ app.get('/', function(request, response) {
         userName = request.cookies.userName;
         console.log(userId);
         for(var i=0; i<board.rows.length; i++)
-        console.log(board.rows[i][5]);
+        console.log(board.rows[i][6]);
         response.render('main', {
             board: board.rows, // DB값을 보냄
             /*
@@ -188,12 +188,19 @@ app.get('/logout/:userId', function(request, response) {
 
 // myPage
 app.get('/myPage/:id', function(request, response) {
+    var myid = request.params.id;
     db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime DESC'
-    , [request.params.id]
+    , [myid]
     , function(error, results) {
-        response.render('myPage', {
-            data: results.rows, // DB값을 보냄
-            userName: userName
+        db.execute('SELECT b.userid, b.boardid, title, content, price FROM BOARD b, HEART he WHERE b.BOARDID=he.boardid AND b.userid = he.USERID AND he.LIKEID= :1'
+        , [myid]
+        , function(error, wishlist) {
+            console.log(wishlist);
+            response.render('myPage', {
+                data: results.rows, // 내가 올린 게시물
+                userName: userName,
+                wish: wishlist.rows // 장바구니 정보
+            });
         });
     });
 });
@@ -317,3 +324,13 @@ app.get('/heart/:userId/:boardId', function(request, response) {
         response.redirect('/lemon/'+userId+'/'+boardId);
     });
 });
+
+app.get('/deleteHeart/:userId/:boardId', function(request, response) {
+    var params = request.params;
+    var myid = request.cookies.userId;
+    db.execute('DELETE FROM heart WHERE userid = :1 AND boardid = :2 AND likeid = :3'
+    , [params.userId, params.boardId, myid]
+    , function(error, result) {
+        response.redirect('/myPage/'+myid);
+    });
+})

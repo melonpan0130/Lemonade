@@ -12,9 +12,17 @@ html
                     a(href='/lemon/'+item[0]+'/'+item[1]): h3= item[2]
                     p= item[3]
                     //- img= item[4]
-                    a(href='/comment/'+item[1])
-                        button Comment
                     a(href='/updateBoard/'+item[1])
                         button Edit
                     a(href='/deleteBoard/'+item[1])
+                        button Delete
+        
+        h3 Wish list
+        ul
+            each item in wish
+                li
+                    a(href='/lemon/'+item[0]+'/'+item[1]): h3= item[2]
+                    p= item[3]
+                    //- img= item[4]
+                    a(href='/deleteHeart/'+item[0]+'/'+item[1])
                         button Delete
