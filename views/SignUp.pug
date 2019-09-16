@@ -3,8 +3,7 @@ html
         script.
         
     body
-        a(href='/')
-            h3 Lemonade
+        include include/title.pug
         form(action='SignUpProc' method='POST')
             label(for="name") Name
             input(type="text" name="name" placeholder="Name")

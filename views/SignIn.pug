@@ -1,8 +1,7 @@
 html
     head
     body
-        a(href='/')
-            h3 Lemonade
+        include include/title.pug
         form(action='SignInProc' method='POST')
             label(for="email") E-mail
             input(type="text" name='email' placeholder="E-mail")

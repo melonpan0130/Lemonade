@@ -85,7 +85,7 @@ var upload = function (req, res) {
 // '/'로 접근했을 때
 app.get('/', function(request, response) {
     db.execute(
-        'SELECT B.USERID, B.BOARDID, B.TITLE, B.CONTENT, (SELECT NAME FROM ADEUSER WHERE USERID = B.USERID), (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID) AS LIKED, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID AND HE.LIKEID = :1) AS ISLIKE FROM BOARD B'
+        'SELECT B.USERID, B.BOARDID, B.TITLE, B.CONTENT, B.NAME, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID) AS LIKED, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID AND HE.LIKEID = :1) AS ISLIKE FROM BOARDINFO B'
     , [request.cookies.userId]
     , function(error, board) {
         userId = request.cookies.userId;
@@ -113,19 +113,21 @@ app.post('/', function(request, response) {
     var option = request.body.option;
     var where;
 
-    if(option == 'all') where = 'userid = :1 OR title = :1';
-    else if(option == 'product') where = 'item = :1'; // make item culumn later..
-    else if(option == 'seller') where = 'userid = :1';
-    else if(option == 'title') where = 'title = :1';
+    if(option == 'all') where = 'UPPER(B.name) = UPPER(:2) OR UPPER(B.title) = UPPER(:2)';
+    // else if(option == 'product') where = 'item = :1'; // make item culumn later..
+    else if(option == 'seller') where = 'UPPER(B.name) = UPPER(:2)';
+    else if(option == 'title') where = 'UPPER(B.title) = UPPER(:2)';
 
-    db.execute('SELECT * FROM BOARD WHERE '+where+' ORDER BY CREATETIME DESC'
-    , [request.body.search]
+    db.execute('SELECT B.USERID, B.BOARDID, B.TITLE, B.CONTENT, B.NAME, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID) AS LIKED, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID AND HE.LIKEID = :1) AS ISLIKE FROM BOARDINFO B WHERE '+where+' ORDER BY CREATETIME DESC'
+    , [request.cookies.userId, request.body.search]
     , function(error, results) {
         if(error)
             console.log(error);
         userId = request.cookies.userId;
         userName = request.cookies.userName;
-        
+        console.log(where);
+        console.log(request.body.search);
+        console.log(results);
         response.render('main', {
             board: results.rows, // DB값을 보냄
             userId : userId,

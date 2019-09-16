@@ -5,7 +5,8 @@ unless userId
     a(href='/SignIn')
         button Sign in
 else 
-    p Welcome, #{userName}!
+    if userName
+        p Welcome, #{userName}!
     a(href='/myPage/'+userId)
         button mypage
     a(href="/logout/"+userId)

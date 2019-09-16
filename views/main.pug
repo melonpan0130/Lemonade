@@ -5,16 +5,11 @@ html
     body
         include include/title.pug
         form(action="/" method="post")
-            select(name="option" onchange="changed()")
+            select(name="option")
                 option(value="all") All
-                option(value="product") Product
                 option(value="seller") Seller
                 option(value="title") Title
-            if false
-                select(name="item")
-                    option(value="sample") sample
-            else
-                input(type="text" name="search" placeholder="Search")
+                input(type="text" name="search" placeholder="Search" required)
             button(type="submit") Search
         ul  
             each item in board
