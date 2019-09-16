@@ -190,25 +190,28 @@ app.get('/myPage/:id', function(request, response) {
     // 내 게시물 조회
     db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime DESC'
     , [myid]
-    , function(error, results) {
+    , function(error1, results) {
         // 위시 리스트 조회
         db.execute('SELECT b.userid, b.boardid, he.heartid, title, content, price FROM BOARD b, HEART he WHERE b.BOARDID=he.boardid AND b.userid = he.USERID AND he.LIKEID= :1'
         , [myid]
-        , function(error, wishlist) {
+        , function(error2, wishlist) {
 
-            db.execute('SELECT FROM ')
-            response.render('myPage', {
-                data: results.rows, // 내가 올린 게시물
-                userName: request.cookies.userName,
-                wish: wishlist.rows // 장바구니 정보
-                /*
-                [0] : userId
-                [1] : boardid
-                [2] : heartId
-                [3] : title
-                [4] : content
-                [5] : price
-                */
+            db.execute('SELECT FROM '
+            , [myid]
+            , function(error3, buylist) {
+                response.render('myPage', {
+                    data: results.rows, // 내가 올린 게시물
+                    userName: request.cookies.userName,
+                    wish: wishlist.rows // 장바구니 정보
+                    /*
+                    [0] : userId
+                    [1] : boardid
+                    [2] : heartId
+                    [3] : title
+                    [4] : content
+                    [5] : price
+                    */ 
+                });
             });
         });
     });
@@ -348,7 +351,36 @@ app.get('/deleteHeart/:userId/:boardId', function(request, response) {
 
 app.post('/addBuy', function(request, response) {
     // request.body.
-    response.render('Buy', {
-        hello : request.body.wish
-    });
+    var wish = request.body.wish;
+    var myid = request.cookies.userId;
+
+    if(typeof(wish)==Array) // wish가 배열일 때
+        wish.map((item, index)=> { // for문은 비동기로 작동하기 때문에 map()함수 사용
+            db.execute('INSERT INTO receipt(userid, boardid, buyer, price) SELECT userid, boardid, likeid, price FROM subreceipt WHERE heartid = :1 AND likeid = :2'
+            , [item, myid]
+            , (error2, result)=>{
+                if(error2)
+                    console.log(error2);
+            });
+
+            // delete from heart
+            db.execute('DELETE FROM heart WHERE heartid = :1 AND likeid = :2'
+            , [item, myid]
+            , ()=>{});
+        });
+    else { // wish가 1개일 때
+        db.execute('INSERT INTO receipt(userid, boardid, buyer, price) SELECT userid, boardid, likeid, price FROM subreceipt WHERE heartid = :1 AND likeid = :2'
+        , [wish, myid]
+        , (error2, result)=>{
+            if(error2)
+                console.log(error2);
+        });
+
+        // delete from heart
+        db.execute('DELETE FROM heart WHERE heartid = :1 AND likeid = :2'
+        , [wish, myid]
+        , ()=>{});
+    }
+
+    response.redirect('/myPage/'+myid);
 });
