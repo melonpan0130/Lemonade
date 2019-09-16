@@ -90,9 +90,7 @@ app.get('/', function(request, response) {
     , function(error, board) {
         userId = request.cookies.userId;
         userName = request.cookies.userName;
-        console.log(userId);
-        for(var i=0; i<board.rows.length; i++)
-        console.log(board.rows[i][6]);
+
         response.render('main', {
             board: board.rows, // DB값을 보냄
             /*
@@ -189,17 +187,28 @@ app.get('/logout/:userId', function(request, response) {
 // myPage
 app.get('/myPage/:id', function(request, response) {
     var myid = request.params.id;
+    // 내 게시물 조회
     db.execute('SELECT * FROM board WHERE userId = :1 ORDER BY createtime DESC'
     , [myid]
     , function(error, results) {
-        db.execute('SELECT b.userid, b.boardid, title, content, price FROM BOARD b, HEART he WHERE b.BOARDID=he.boardid AND b.userid = he.USERID AND he.LIKEID= :1'
+        // 위시 리스트 조회
+        db.execute('SELECT b.userid, b.boardid, he.heartid, title, content, price FROM BOARD b, HEART he WHERE b.BOARDID=he.boardid AND b.userid = he.USERID AND he.LIKEID= :1'
         , [myid]
         , function(error, wishlist) {
-            console.log(wishlist);
+
+            db.execute('SELECT FROM ')
             response.render('myPage', {
                 data: results.rows, // 내가 올린 게시물
-                userName: userName,
+                userName: request.cookies.userName,
                 wish: wishlist.rows // 장바구니 정보
+                /*
+                [0] : userId
+                [1] : boardid
+                [2] : heartId
+                [3] : title
+                [4] : content
+                [5] : price
+                */
             });
         });
     });
@@ -313,6 +322,7 @@ app.get('/DeleteComment/:id/:boardId/:commentId', function(request, response) {
     });
 })
 
+// 장바구니 추가
 app.get('/heart/:userId/:boardId', function(request, response) {
     // cookie!
     var userId = request.params.userId;
@@ -325,6 +335,7 @@ app.get('/heart/:userId/:boardId', function(request, response) {
     });
 });
 
+// 장바구니 상품 삭제
 app.get('/deleteHeart/:userId/:boardId', function(request, response) {
     var params = request.params;
     var myid = request.cookies.userId;
@@ -333,4 +344,11 @@ app.get('/deleteHeart/:userId/:boardId', function(request, response) {
     , function(error, result) {
         response.redirect('/myPage/'+myid);
     });
-})
+});
+
+app.post('/addBuy', function(request, response) {
+    // request.body.
+    response.render('Buy', {
+        hello : request.body.wish
+    });
+});

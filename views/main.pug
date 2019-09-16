@@ -31,11 +31,11 @@ html
                             input(type="text" name="comment")
                         a(href='/comment/'+item[0]+'/'+item[1])
                             button Comment
-                    if item[6] != 0
-                        img(src="/images/like.png")
-                    else
+                    unless item[6]
                         a(href="/heart/"+item[0]+'/'+item[1])
                             img(src="/images/like1.png")
+                    else
+                        img(src="/images/like.png")
                     if userId == item[0]
                         a(href='/updateBoard/'+item[1])
                             button Edit

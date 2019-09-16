@@ -16,13 +16,20 @@ html
                         button Edit
                     a(href='/deleteBoard/'+item[1])
                         button Delete
-        
         h3 Wish list
+        form(action="/addBuy", method="post")
+            ul
+                each item in wish
+                    li
+                        input(type="checkbox" name="wish" value=item[2])
+                        a(href='/lemon/'+item[0]+'/'+item[1]): h3= item[3]
+                        p= item[4]
+                        //- img= item[4]
+                        a(href='/deleteHeart/'+item[0]+'/'+item[1])
+                            button Delete
+            button(type="submit") Buy
+        
+        h3 Buy list
         ul
             each item in wish
-                li
-                    a(href='/lemon/'+item[0]+'/'+item[1]): h3= item[2]
-                    p= item[3]
-                    //- img= item[4]
-                    a(href='/deleteHeart/'+item[0]+'/'+item[1])
-                        button Delete
+                li= item
