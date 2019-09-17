@@ -3,7 +3,9 @@ html
         script. 
     body
         include include/title.pug
-        h1 Lemonade -#{userName}'s Page
+        a(href="/logout/"+userId)
+            button Log out
+        h2 #{userName}'s Page
         a(href="/insert/")
             button New
         ul
@@ -31,5 +33,5 @@ html
         
         h3 Buy list
         ul
-            each item in wish
+            each item in buy
                 li= item

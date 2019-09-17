@@ -101,8 +101,9 @@ app.get('/', function(request, response) {
             4 USERNAME
             5 LIKED COUNT
             6 Is like? 내가 좋아요를 눌렀는가??
+            7 price
             */
-            userId : userId,
+            userId : request.cookies.userId,
             userName : userName
         });
     });
@@ -197,15 +198,16 @@ app.get('/myPage/:id', function(request, response) {
         db.execute('SELECT b.userid, b.boardid, he.heartid, title, content, price FROM BOARD b, HEART he WHERE b.BOARDID=he.boardid AND b.userid = he.USERID AND he.LIKEID= :1'
         , [myid]
         , function(error2, wishlist) {
-
-            db.execute('SELECT FROM '
+            db.execute('SELECT * FROM receipt WHERE buyer = :1'
             , [myid]
             , function(error3, buylist) {
+                console.log(buylist);
                 response.render('myPage', {
                     data: results.rows, // 내가 올린 게시물
                     userName: request.cookies.userName,
-                    wish: wishlist.rows // 장바구니 정보
+                    wish: wishlist.rows, // 장바구니 정보
                     /*
+                    wishList
                     [0] : userId
                     [1] : boardid
                     [2] : heartId
@@ -213,6 +215,7 @@ app.get('/myPage/:id', function(request, response) {
                     [4] : content
                     [5] : price
                     */ 
+                    buy: buylist.rows
                 });
             });
         });
@@ -228,17 +231,16 @@ app.get('/insert', function(request, response) {
 app.post('/insert', function(request, response) {
     var body = request.body;
     db.execute('SELECT COUNT(*) FROM board WHERE userId = :1'
-    , [userId]
+    , [request.cookies.userId]
     , function(error, id) { 
         // boardid값을 설정하는 것이 목적.
         // 같은 사용자 내에서만 숫자가 증가하도록 설정. -> make function later
-        db.execute('INSERT INTO board (userId, boardid, title, content, img) VALUES (:1, :2, :3, :4, :5)'
-        , [userId, (id.rows[0][0]+1), body.title, body.content, body.img]
+        db.execute('INSERT INTO board (userId, boardid, title, content, img, price) VALUES (:1, :2, :3, :4, :5, :6)'
+        , [request.cookies.userId, (id.rows[0][0]+1), body.title, body.content, body.img, body.price]
         , function(error, results) {
-            response.redirect('/myPage/'+userId);
-            console.log('insert');
-            console.log(body.title);
-            console.log(body.img);
+            if(error)
+                console.log(error);
+            response.redirect('/myPage/'+request.cookies.userId);
         }); // insert
     });
 });
@@ -363,6 +365,7 @@ app.post('/addBuy', function(request, response) {
             , (error2, result)=>{
                 if(error2)
                     console.log(error2);
+                console.log(result);
             });
 
             // delete from heart
