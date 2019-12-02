@@ -84,6 +84,7 @@ var upload = function (req, res) {
 
 // '/'로 접근했을 때
 app.get('/', function(request, response) {
+    console.log('whe');
     db.execute(
         'SELECT B.USERID, B.BOARDID, B.TITLE, B.CONTENT, B.NAME, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID) AS LIKED, (SELECT COUNT(*) FROM HEART HE WHERE HE.USERID=B.USERID AND HE.BOARDID=B.BOARDID AND HE.LIKEID = :1) AS ISLIKE FROM BOARDINFO B'
     , [request.cookies.userId]
